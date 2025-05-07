@@ -1,6 +1,5 @@
 package backend.model;
 
-
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
@@ -14,9 +13,9 @@ public class UserModel {
     private String email;
     private String password;
     private String phone;
+    private String profilePicture;
 
     public UserModel() {
-
     }
 
     public Long getId() {
@@ -57,5 +56,13 @@ public class UserModel {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getProfilePicture() {
+        return profilePicture;
+    }
+
+    public void setProfilePicture(String profilePicture) {
+        this.profilePicture = profilePicture;
     }
 }

@@ -10,6 +10,8 @@ const Register = () => {
     password: "",
     phone: "",
   });
+  const [profilePicture, setProfilePicture] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
 
@@ -18,6 +20,18 @@ const Register = () => {
   const onInputChange = (e) => {
     setUser({ ...user, [e.target.name]: e.target.value });
     setError("");
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) { // 5MB limit
+        setError("File size should be less than 5MB");
+        return;
+      }
+      setProfilePicture(file);
+      setPreviewUrl(URL.createObjectURL(file));
+    }
   };
 
   const validateForm = () => {
@@ -50,13 +64,65 @@ const Register = () => {
     if (!validateForm()) return;
     
     setIsSubmitting(true);
+    setError(""); // Clear any existing errors
+    
     try {
-      await axios.post("http://localhost:8082/user", user);
-      alert("User Registered Successfully");
-      navigate("/login");
+      // First, register the user
+      const response = await axios.post("http://localhost:8082/user", user, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        }
+      });
+      
+      if (response.data && response.data.id) {
+        // If profile picture is selected, upload it
+        if (profilePicture) {
+          const formData = new FormData();
+          formData.append("file", profilePicture);
+          
+          try {
+            await axios.post(
+              `http://localhost:8082/user/${response.data.id}/profile-picture`,
+              formData,
+              {
+                headers: {
+                  'Content-Type': 'multipart/form-data',
+                },
+                withCredentials: true
+              }
+            );
+          } catch (uploadError) {
+            console.error("Error uploading profile picture:", uploadError);
+            // Continue with registration even if profile picture upload fails
+          }
+        }
+        
+        alert("Registration successful! Please login.");
+        navigate("/login");
+      }
     } catch (err) {
-      setError(err.response?.data?.message || "Error registering user");
       console.error("Registration error:", err);
+      
+      if (err.response) {
+        switch (err.response.status) {
+          case 409:
+            setError("This email address is already registered. Please use a different email or try logging in.");
+            break;
+          case 400:
+            setError(err.response.data.message || "Invalid registration data. Please check your input.");
+            break;
+          case 500:
+            setError("Server error occurred. Please try again later.");
+            break;
+          default:
+            setError(err.response.data.message || "Registration failed. Please try again.");
+        }
+      } else if (err.request) {
+        setError("No response from server. Please check your connection.");
+      } else {
+        setError("An unexpected error occurred. Please try again.");
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -162,6 +228,37 @@ const Register = () => {
         )}
         
         <form onSubmit={onSubmit} style={{ marginTop: "32px" }}>
+          <div style={{ marginBottom: "24px" }}>
+            <label htmlFor="profilePicture" style={labelStyle}>
+              Profile Picture
+            </label>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+              {previewUrl && (
+                <img
+                  src={previewUrl}
+                  alt="Profile preview"
+                  style={{
+                    width: '100px',
+                    height: '100px',
+                    borderRadius: '50%',
+                    objectFit: 'cover'
+                  }}
+                />
+              )}
+              <input
+                type="file"
+                id="profilePicture"
+                accept="image/*"
+                onChange={handleFileChange}
+                style={{
+                  ...inputStyle,
+                  padding: '8px',
+                  marginBottom: '0'
+                }}
+              />
+            </div>
+          </div>
+
           <div style={{ marginBottom: "24px" }}>
             <label htmlFor="fullname" style={labelStyle}>
               Full Name

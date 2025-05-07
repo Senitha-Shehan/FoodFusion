@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import GoogleAuth from "./GoogleAuth";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -17,7 +18,7 @@ const Login = () => {
     try {
       const response = await axios.post("http://localhost:8082/login", {
         email,
-        password
+        password,
       });
 
       if (response.data.id) {
@@ -27,7 +28,9 @@ const Login = () => {
         setError("Invalid email or password");
       }
     } catch (err) {
-      setError(err.response?.data?.Message || "Login failed. Please try again.");
+      setError(
+        err.response?.data?.Message || "Login failed. Please try again."
+      );
     } finally {
       setIsLoading(false);
     }
@@ -40,7 +43,7 @@ const Login = () => {
     alignItems: "center",
     minHeight: "100vh",
     backgroundColor: "#f5f5f5",
-    fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
+    fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
   };
 
   const formContainerStyle = {
@@ -49,7 +52,7 @@ const Login = () => {
     padding: "32px",
     backgroundColor: "#ffffff",
     borderRadius: "8px",
-    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)"
+    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
   };
 
   const headingStyle = {
@@ -57,7 +60,7 @@ const Login = () => {
     fontSize: "24px",
     fontWeight: "600",
     color: "#333333",
-    textAlign: "center"
+    textAlign: "center",
   };
 
   const labelStyle = {
@@ -65,7 +68,7 @@ const Login = () => {
     marginBottom: "8px",
     fontSize: "14px",
     fontWeight: "500",
-    color: "#444444"
+    color: "#444444",
   };
 
   const inputStyle = {
@@ -82,7 +85,7 @@ const Login = () => {
   const inputFocusStyle = {
     outline: "none",
     borderColor: "#007bff",
-    boxShadow: "0 0 0 2px rgba(0, 123, 255, 0.25)"
+    boxShadow: "0 0 0 2px rgba(0, 123, 255, 0.25)",
   };
 
   const buttonStyle = {
@@ -96,23 +99,23 @@ const Login = () => {
     fontWeight: "500",
     cursor: "pointer",
     transition: "background-color 0.3s ease",
-    marginTop: "8px"
+    marginTop: "8px",
   };
 
   const buttonHoverStyle = {
-    backgroundColor: "#0069d9"
+    backgroundColor: "#0069d9",
   };
 
   const buttonDisabledStyle = {
     backgroundColor: "#cccccc",
-    cursor: "not-allowed"
+    cursor: "not-allowed",
   };
 
   const errorStyle = {
     color: "#dc3545",
     fontSize: "14px",
     margin: "8px 0 16px 0",
-    textAlign: "center"
+    textAlign: "center",
   };
 
   const linkStyle = {
@@ -120,7 +123,7 @@ const Login = () => {
     textAlign: "center",
     marginTop: "16px",
     color: "#666666",
-    fontSize: "14px"
+    fontSize: "14px",
   };
 
   const registerLinkStyle = {
@@ -128,19 +131,21 @@ const Login = () => {
     textDecoration: "none",
     fontWeight: "500",
     marginLeft: "4px",
-    cursor: "pointer"
+    cursor: "pointer",
   };
 
   return (
     <div style={containerStyle}>
       <div style={formContainerStyle}>
         <h1 style={headingStyle}>Login to Your Account</h1>
-        
+
         {error && <div style={errorStyle}>{error}</div>}
-        
+
         <form onSubmit={onSubmit}>
           <div>
-            <label htmlFor="email" style={labelStyle}>Email Address</label>
+            <label htmlFor="email" style={labelStyle}>
+              Email Address
+            </label>
             <input
               type="email"
               id="email"
@@ -149,13 +154,17 @@ const Login = () => {
               onChange={(e) => setEmail(e.target.value)}
               required
               style={inputStyle}
-              onFocus={(e) => e.target.style = {...inputStyle, ...inputFocusStyle}}
-              onBlur={(e) => e.target.style = inputStyle}
+              onFocus={(e) =>
+                (e.target.style = { ...inputStyle, ...inputFocusStyle })
+              }
+              onBlur={(e) => (e.target.style = inputStyle)}
             />
           </div>
-          
+
           <div>
-            <label htmlFor="password" style={labelStyle}>Password</label>
+            <label htmlFor="password" style={labelStyle}>
+              Password
+            </label>
             <input
               type="password"
               id="password"
@@ -164,30 +173,35 @@ const Login = () => {
               onChange={(e) => setPassword(e.target.value)}
               required
               style={inputStyle}
-              onFocus={(e) => e.target.style = {...inputStyle, ...inputFocusStyle}}
-              onBlur={(e) => e.target.style = inputStyle}
+              onFocus={(e) =>
+                (e.target.style = { ...inputStyle, ...inputFocusStyle })
+              }
+              onBlur={(e) => (e.target.style = inputStyle)}
             />
           </div>
-          
+
           <button
             type="submit"
             style={{
               ...buttonStyle,
               ...(isLoading ? buttonDisabledStyle : {}),
-              ...(!isLoading ? {':hover': buttonHoverStyle} : {})
+              ...(!isLoading ? { ":hover": buttonHoverStyle } : {}),
             }}
             disabled={isLoading}
           >
             {isLoading ? "Logging in..." : "Login"}
           </button>
+          <div style={{ marginTop: "20px", textAlign: "center" }}>
+            <p style={{ marginBottom: "10px", color: "#666" }}>
+              Or sign in with
+            </p>
+            <GoogleAuth />
+          </div>
         </form>
-        
+
         <div style={linkStyle}>
           Don't have an account?{" "}
-          <span 
-            style={registerLinkStyle}
-            onClick={() => navigate("/register")}
-          >
+          <span style={registerLinkStyle} onClick={() => navigate("/register")}>
             Register
           </span>
         </div>

@@ -1,0 +1,84 @@
+# Environment variables
+.env
+.env.local
+.env.*.local
+*.env
+
+# Compiled output
+/target/
+/build/
+/dist/
+/out/
+
+# Dependencies
+/node_modules/
+/.pnp
+.pnp.js
+
+# IDEs and editors
+/.idea/
+/.vscode/
+*.iml
+*.iws
+*.ipr
+.project
+.classpath
+.settings/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# System Files
+.DS_Store
+Thumbs.db
+
+# Uploaded files
+/src/main/resources/static/uploads/
+/uploads/
+
+# Testing
+/coverage/
+
+# Production build files
+/build/
+/dist/
+
+# Misc
+*.swp
+*.swo
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Application properties with sensitive data
+/src/main/resources/application-local.properties
+/src/main/resources/application-dev.properties
+/src/main/resources/application-prod.properties
+
+# Sensitive configuration files
+application-secrets.properties
+application-local.yml
+application-local.properties
+
+# Server Configuration
+SERVER_PORT=8082
+FRONTEND_URL=http://localhost:5173
+
+# Database Configuration
+DB_URL=jdbc:mysql://localhost:3306/foodfusion
+DB_USERNAME=root
+DB_PASSWORD=your_database_password
+
+# JWT Configuration
+JWT_SECRET=your_secure_jwt_secret_key
+JWT_EXPIRATION=86400000
+
+# File Upload Configuration
+UPLOAD_DIR=src/main/resources/static/uploads/profile-pictures/
+
+# Google OAuth2 Configuration
+GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_CLIENT_SECRET=your_google_client_secret 
