@@ -90,4 +90,28 @@ public class cookingPlansController {
                 })
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
+
+    @PutMapping("/{id}/image")
+    public ResponseEntity<?> updatePlanImage(@PathVariable Long id, @RequestParam("file") MultipartFile file) {
+        return cookingPlansRepository.findById(id).map(plan -> {
+            String folder = "src/main/resources/static/uploads/";
+            String fileName = file.getOriginalFilename();
+
+            File uploadDir = new File(folder);
+            if (!uploadDir.exists()) {
+                uploadDir.mkdirs();
+            }
+
+            try {
+                Path filePath = Paths.get(folder + fileName);
+                file.transferTo(filePath);
+                plan.setPlanImage(fileName);
+                cookingPlansRepository.save(plan); // Save updated plan
+                return ResponseEntity.ok("{\"message\": \"Image updated successfully\", \"filename\": \"" + fileName + "\"}");
+            } catch (IOException e) {
+                e.printStackTrace();
+                return ResponseEntity.status(500).body("{\"error\": \"Failed to upload image\"}");
+            }
+        }).orElseGet(() -> ResponseEntity.notFound().build());
+    }
 }
