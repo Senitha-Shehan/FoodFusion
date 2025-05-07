@@ -22,5 +22,5 @@ const App = () => {
           <Route path="/DisplayCookingPlans" element={<DisplayCookingPlans />} />
       </Routes>
     </div>
-
+  )}
 export default App;
