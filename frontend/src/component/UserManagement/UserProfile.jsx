@@ -16,20 +16,13 @@ const UserProfile = () => {
 
   const getProfileImageUrl = (profilePicture) => {
     if (!profilePicture) return 'https://via.placeholder.com/150';
-    
-    // If it's already a full URL, return it
-    if (profilePicture.startsWith('http')) {
-      return profilePicture;
-    }
-    
-    // If it's a relative path, ensure it starts with a forward slash
+    if (profilePicture.startsWith('http')) return profilePicture;
     const path = profilePicture.startsWith('/') ? profilePicture : `/${profilePicture}`;
     return `http://localhost:8082${path}`;
   };
 
   const handleImageError = (e) => {
-    console.error("Error loading image. Current src:", e.target.src);
-    e.target.onerror = null; // Prevent infinite loop
+    e.target.onerror = null;
     e.target.src = 'https://via.placeholder.com/150';
   };
 
@@ -55,8 +48,7 @@ const UserProfile = () => {
           setUser(response.data);
           setEditedUser(response.data);
           if (response.data.profilePicture) {
-            const imageUrl = getProfileImageUrl(response.data.profilePicture);
-            setPreviewUrl(imageUrl);
+            setPreviewUrl(getProfileImageUrl(response.data.profilePicture));
           }
         }
       } catch (err) {
@@ -75,24 +67,19 @@ const UserProfile = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setEditedUser((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setEditedUser(prev => ({ ...prev, [name]: value }));
     setError("");
   };
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      // Validate file type
       const validTypes = ['image/jpeg', 'image/png', 'image/gif'];
       if (!validTypes.includes(file.type)) {
         setError("Please select a valid image file (JPEG, PNG, or GIF)");
         return;
       }
 
-      // Validate file size (5MB limit)
       if (file.size > 5 * 1024 * 1024) {
         setError("File size should be less than 5MB");
         return;
@@ -100,16 +87,15 @@ const UserProfile = () => {
 
       setProfilePicture(file);
       setPreviewUrl(URL.createObjectURL(file));
-      setError(""); // Clear any previous errors
+      setError("");
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(""); // Clear any previous errors
+    setError("");
     
     try {
-      // First update user details
       const response = await axios.put(
         `http://localhost:8082/user/${userId}`,
         editedUser,
@@ -122,25 +108,19 @@ const UserProfile = () => {
         }
       );
 
-      // If profile picture is selected, upload it
       if (profilePicture) {
         const formData = new FormData();
         formData.append("file", profilePicture);
         
         try {
-          console.log("Uploading profile picture...");
           const uploadResponse = await axios.post(
             `http://localhost:8082/user/${userId}/profile-picture`,
             formData,
             {
-              headers: {
-                'Content-Type': 'multipart/form-data',
-              },
+              headers: { 'Content-Type': 'multipart/form-data' },
               withCredentials: true
             }
           );
-          
-          console.log("Upload response:", uploadResponse.data);
           
           if (uploadResponse.data.profilePicture) {
             const imageUrl = getProfileImageUrl(uploadResponse.data.profilePicture);
@@ -149,10 +129,9 @@ const UserProfile = () => {
           }
         } catch (uploadError) {
           console.error("Error uploading profile picture:", uploadError);
-          const errorMessage = uploadError.response?.data?.message || 
-                             uploadError.message || 
-                             "Error uploading profile picture. Please try again.";
-          setError(errorMessage);
+          setError(uploadError.response?.data?.message || 
+                  uploadError.message || 
+                  "Error uploading profile picture. Please try again.");
           return;
         }
       }
@@ -162,10 +141,9 @@ const UserProfile = () => {
       setProfilePicture(null);
     } catch (err) {
       console.error("Error updating profile:", err);
-      const errorMessage = err.response?.data?.message || 
-                          err.message || 
-                          "Failed to update profile. Please try again.";
-      setError(errorMessage);
+      setError(err.response?.data?.message || 
+              err.message || 
+              "Failed to update profile. Please try again.");
     }
   };
 
@@ -197,13 +175,9 @@ const UserProfile = () => {
       await axios.post("http://localhost:8082/logout", {}, {
         withCredentials: true,
       });
-      localStorage.removeItem('userId');
-      localStorage.removeItem('userEmail');
-      localStorage.removeItem('userName');
-      navigate("/login");
     } catch (err) {
       console.error("Error logging out:", err);
-      // Even if the server request fails, we should still log the user out locally
+    } finally {
       localStorage.removeItem('userId');
       localStorage.removeItem('userEmail');
       localStorage.removeItem('userName');
@@ -211,115 +185,23 @@ const UserProfile = () => {
     }
   };
 
-  // Inline styles
-  const containerStyle = {
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    minHeight: "100vh",
-    backgroundColor: "#f5f5f5",
-    fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
-  };
-
-  const cardStyle = {
-    width: "100%",
-    maxWidth: "600px",
-    padding: "32px",
-    backgroundColor: "#ffffff",
-    borderRadius: "8px",
-    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)"
-  };
-
-  const headingStyle = {
-    margin: "0 0 24px 0",
-    fontSize: "24px",
-    fontWeight: "600",
-    color: "#333333",
-    textAlign: "center"
-  };
-
-  const labelStyle = {
-    display: "block",
-    marginBottom: "8px",
-    fontSize: "14px",
-    fontWeight: "500",
-    color: "#444444"
-  };
-
-  const inputStyle = {
-    width: "100%",
-    padding: "12px",
-    marginBottom: "16px",
-    border: "1px solid #dddddd",
-    borderRadius: "6px",
-    fontSize: "16px",
-    boxSizing: "border-box"
-  };
-
-  const buttonStyle = {
-    padding: "12px 24px",
-    marginRight: "12px",
-    backgroundColor: "#007bff",
-    color: "#ffffff",
-    border: "none",
-    borderRadius: "6px",
-    fontSize: "16px",
-    fontWeight: "500",
-    cursor: "pointer",
-    transition: "background-color 0.3s ease"
-  };
-
-  const buttonHoverStyle = {
-    backgroundColor: "#0069d9"
-  };
-
-  const secondaryButtonStyle = {
-    ...buttonStyle,
-    backgroundColor: "#6c757d"
-  };
-
-  const dangerButtonStyle = {
-    ...buttonStyle,
-    backgroundColor: "#dc3545"
-  };
-
-  const infoTextStyle = {
-    margin: "8px 0",
-    fontSize: "16px",
-    color: "#333333"
-  };
-
-  const errorStyle = {
-    color: "#dc3545",
-    fontSize: "14px",
-    margin: "16px 0",
-    textAlign: "center"
-  };
-
-  const successStyle = {
-    color: "#28a745",
-    fontSize: "14px",
-    margin: "16px 0",
-    textAlign: "center"
-  };
-
   if (isLoading) {
     return (
-      <div style={containerStyle}>
-        <div style={cardStyle}>
-          <p style={{ textAlign: "center" }}>Loading your profile...</p>
+      <div className="flex items-center justify-center min-h-screen bg-gray-100">
+        <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-md">
+          <p className="text-center">Loading your profile...</p>
         </div>
       </div>
     );
   }
 
-  if (error) {
+  if (error && !userId) {
     return (
-      <div style={containerStyle}>
-        <div style={cardStyle}>
-          <p style={errorStyle}>{error}</p>
+      <div className="flex items-center justify-center min-h-screen bg-gray-100">
+        <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-md">
+          <p className="mb-4 text-center text-red-500">{error}</p>
           <button 
-            style={buttonStyle} 
+            className="w-full px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600"
             onClick={() => navigate("/login")}
           >
             Go to Login
@@ -330,19 +212,19 @@ const UserProfile = () => {
   }
 
   return (
-    <div style={containerStyle}>
-      <div style={cardStyle}>
-        <h1 style={headingStyle}>User Profile</h1>
+    <div className="flex items-center justify-center min-h-screen bg-gray-100 p-4">
+      <div className="w-full max-w-2xl p-6 bg-white rounded-lg shadow-md">
+        <h1 className="mb-6 text-2xl font-bold text-center text-gray-800">User Profile</h1>
         
-        {error && <div style={errorStyle}>{error}</div>}
+        {error && <div className="p-3 mb-4 text-center text-red-500 bg-red-100 rounded">{error}</div>}
 
         {isEditing ? (
-          <form onSubmit={handleSubmit} style={formStyle}>
-            <div style={imageContainerStyle}>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="flex flex-col items-center space-y-4">
               <img
                 src={previewUrl || getProfileImageUrl(user?.profilePicture)}
                 alt="Profile"
-                style={profileImageStyle}
+                className="w-32 h-32 rounded-full border-4 border-gray-200 object-cover"
                 onError={handleImageError}
                 crossOrigin="anonymous"
               />
@@ -351,57 +233,54 @@ const UserProfile = () => {
                 id="profilePicture"
                 accept="image/*"
                 onChange={handleFileChange}
-                style={fileInputStyle}
+                className="w-full max-w-xs px-3 py-2 border border-gray-300 rounded"
               />
             </div>
 
-            <div style={inputGroupStyle}>
-              <label htmlFor="fullname" style={labelStyle}>
-                Full Name
-              </label>
+            <div className="space-y-2">
+              <label htmlFor="fullname" className="block text-sm font-medium text-gray-700">Full Name</label>
               <input
                 type="text"
                 id="fullname"
                 name="fullname"
                 value={editedUser.fullname}
                 onChange={handleInputChange}
-                style={inputStyle}
+                className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
               />
             </div>
 
-            <div style={inputGroupStyle}>
-              <label htmlFor="email" style={labelStyle}>
-                Email
-              </label>
+            <div className="space-y-2">
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email</label>
               <input
                 type="email"
                 id="email"
                 name="email"
                 value={editedUser.email}
                 onChange={handleInputChange}
-                style={inputStyle}
+                className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
               />
             </div>
 
-            <div style={inputGroupStyle}>
-              <label htmlFor="phone" style={labelStyle}>
-                Phone
-              </label>
+            <div className="space-y-2">
+              <label htmlFor="phone" className="block text-sm font-medium text-gray-700">Phone</label>
               <input
                 type="text"
                 id="phone"
                 name="phone"
                 value={editedUser.phone}
                 onChange={handleInputChange}
-                style={inputStyle}
+                className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
               />
             </div>
 
-            <div style={buttonGroupStyle}>
-              <button type="submit" style={saveButtonStyle}>
+            <div className="flex flex-wrap gap-3 pt-4">
+              <button 
+                type="submit" 
+                className="px-4 py-2 text-white bg-green-500 rounded hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500"
+              >
                 Save Changes
               </button>
               <button
@@ -412,63 +291,61 @@ const UserProfile = () => {
                   setProfilePicture(null);
                   setPreviewUrl(user.profilePicture ? getProfileImageUrl(user.profilePicture) : null);
                 }}
-                style={cancelButtonStyle}
+                className="px-4 py-2 text-white bg-gray-500 rounded hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500"
               >
                 Cancel
               </button>
             </div>
           </form>
         ) : (
-          <div style={profileInfoStyle}>
-            <div style={imageContainerStyle}>
+          <div className="space-y-6">
+            <div className="flex flex-col items-center">
               <img
                 src={previewUrl || getProfileImageUrl(user?.profilePicture)}
                 alt="Profile"
-                style={profileImageStyle}
+                className="w-32 h-32 rounded-full border-4 border-gray-200 object-cover"
                 onError={handleImageError}
                 crossOrigin="anonymous"
               />
             </div>
 
-            <div style={infoGroupStyle}>
-              <label style={labelStyle}>Full Name</label>
-              <p style={infoTextStyle}>{user.fullname}</p>
+            <div className="space-y-1">
+              <label className="block text-sm font-medium text-gray-500">Full Name</label>
+              <p className="text-lg text-gray-800">{user.fullname}</p>
             </div>
 
-            <div style={infoGroupStyle}>
-              <label style={labelStyle}>Email</label>
-              <p style={infoTextStyle}>{user.email}</p>
+            <div className="space-y-1">
+              <label className="block text-sm font-medium text-gray-500">Email</label>
+              <p className="text-lg text-gray-800">{user.email}</p>
             </div>
 
-            <div style={infoGroupStyle}>
-              <label style={labelStyle}>Phone</label>
-              <p style={infoTextStyle}>{user.phone}</p>
+            <div className="space-y-1">
+              <label className="block text-sm font-medium text-gray-500">Phone</label>
+              <p className="text-lg text-gray-800">{user.phone}</p>
             </div>
 
-            <div style={buttonGroupStyle}>
+            <div className="flex flex-wrap gap-3 pt-6">
               <button
                 onClick={() => setIsEditing(true)}
-                style={editButtonStyle}
+                className="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 Edit Profile
               </button>
               <button 
                 onClick={() => navigate("/users")}
-                style={buttonStyle}
+                className="px-4 py-2 text-white bg-indigo-500 rounded hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500"
               >
                 View Other Users
               </button>
               <button 
-                style={dangerButtonStyle}
                 onClick={handleDelete}
-                onMouseOver={(e) => e.currentTarget.style.backgroundColor = "#c82333"}
-                onMouseOut={(e) => e.currentTarget.style.backgroundColor = "#dc3545"}
+                className="px-4 py-2 text-white bg-red-500 rounded hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500"
               >
                 Delete Account
               </button>
               <button 
-                onClick={handleLogout} 
-                style={logoutButtonStyle}
+                onClick={handleLogout}
+                className="px-4 py-2 text-white bg-purple-500 rounded hover:bg-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-500"
               >
                 Logout
               </button>
@@ -478,88 +355,6 @@ const UserProfile = () => {
       </div>
     </div>
   );
-};
-
-// Styles
-const formStyle = {
-  display: "flex",
-  flexDirection: "column",
-  gap: "20px",
-};
-
-const profileInfoStyle = {
-  display: "flex",
-  flexDirection: "column",
-  gap: "20px",
-};
-
-const imageContainerStyle = {
-  display: "flex",
-  flexDirection: "column",
-  alignItems: "center",
-  gap: "16px",
-  marginBottom: "24px",
-};
-
-const profileImageStyle = {
-  width: "150px",
-  height: "150px",
-  borderRadius: "50%",
-  objectFit: "cover",
-  border: "4px solid #e2e8f0",
-};
-
-const fileInputStyle = {
-  padding: "8px",
-  border: "1px solid #e2e8f0",
-  borderRadius: "4px",
-  width: "100%",
-  maxWidth: "300px",
-};
-
-const inputGroupStyle = {
-  display: "flex",
-  flexDirection: "column",
-  gap: "8px",
-};
-
-const infoGroupStyle = {
-  display: "flex",
-  flexDirection: "column",
-  gap: "4px",
-};
-
-const buttonGroupStyle = {
-  display: "flex",
-  gap: "12px",
-  marginTop: "24px",
-  flexWrap: "wrap"
-};
-
-const editButtonStyle = {
-  padding: "12px 24px",
-  backgroundColor: "#4299e1",
-  color: "white",
-  border: "none",
-  borderRadius: "4px",
-  cursor: "pointer",
-  fontSize: "16px",
-  flex: 1,
-};
-
-const saveButtonStyle = {
-  ...editButtonStyle,
-  backgroundColor: "#48bb78",
-};
-
-const cancelButtonStyle = {
-  ...editButtonStyle,
-  backgroundColor: "#a0aec0",
-};
-
-const logoutButtonStyle = {
-  ...editButtonStyle,
-  backgroundColor: "#f56565",
 };
 
 export default UserProfile;
