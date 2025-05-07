@@ -11,6 +11,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.filter.CorsFilter;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.util.Arrays;
 import java.util.List;
@@ -18,6 +19,9 @@ import java.util.List;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+
+    @Value("${spring.security.oauth2.client.registration.google.client-id:}")
+    private String googleClientId;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -27,12 +31,16 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/user/**", "/login", "/register", "/logout", "/oauth2/**", "/login/oauth2/code/*", "/uploads/**", "/static/**").permitAll()
                 .anyRequest().authenticated()
-            )
-            .oauth2Login(oauth2 -> oauth2
+            );
+        
+        // Only configure OAuth2 login if client ID is not the dummy value
+        if (googleClientId != null && !googleClientId.equals("dummy-client-id")) {
+            http.oauth2Login(oauth2 -> oauth2
                 .loginPage("http://localhost:5173/login")
                 .defaultSuccessUrl("http://localhost:5173/userProfile", true)
                 .failureUrl("http://localhost:5173/login?error=true")
             );
+        }
 
         return http.build();
     }
